@@ -56,28 +56,52 @@ def agglomerative_clustering(dist_matrix, linkage_method, num_clusters):
     return find_clusters(linkage_matrix, num_clusters)
 
 
-filename = input("Filename:")
-num_clusters = int(input("Number of clusters:"))
-data = np.loadtxt(filename, delimiter=';')
-#plot_clusters(data, np.zeros(data.shape[0]), "Original Data")
-#print(data)
+def normalize(data):
+    min_vals = np.min(data, axis=0)
+    max_vals = np.max(data, axis=0)
+    normalized_data = (data - min_vals) / (max_vals - min_vals)
+    return normalized_data
 
-# Compute Manhattan distance matrix
-manhattan_dist_matrix = np.abs(data[:, np.newaxis] - data).sum(axis=2)
+def standardize(data):
+    mean_vals = np.mean(data, axis=0)
+    std_vals = np.std(data, axis=0)
+    standardized_data = (data - mean_vals) / std_vals
+    return standardized_data
 
-# Compute Euclidean distance matrix
-euclidean_dist_matrix = np.sqrt(((data[:, np.newaxis] - data) ** 2).sum(axis=2))
 
-# Perform clustering and plot results
-manhattan_clusters_single = agglomerative_clustering(manhattan_dist_matrix, 'single', num_clusters)
-plot_clusters(data, manhattan_clusters_single, "Manhattan Distance - Single Linkage")
+def main():
+    filename = input("Filename:")
+    num_clusters = int(input("Number of clusters:"))
+    data = np.loadtxt(filename, delimiter=';')
+    normalized_data= normalize(data)
+    standardized_data = standardize(data)
 
-manhattan_clusters_complete = agglomerative_clustering(manhattan_dist_matrix, 'complete', num_clusters)
-plot_clusters(data, manhattan_clusters_complete, "Manhattan Distance - Complete Linkage")
+    manhattan_dist_matrix = np.abs(data[:, np.newaxis] - data).sum(axis=2)
+    euclidean_dist_matrix = np.sqrt(((data[:, np.newaxis] - data) ** 2).sum(axis=2))
+    cosine_dist_matrix = 1 - np.dot(data, data.T) / (np.linalg.norm(data, axis=1)[:, np.newaxis] * np.linalg.norm(data, axis=1))
 
-euclidean_clusters_single = agglomerative_clustering(euclidean_dist_matrix, 'single', num_clusters)
-plot_clusters(data, euclidean_clusters_single, "Euclidean Distance - Single Linkage")
+    #plot_clusters(data, np.zeros(data.shape[0]), "Original Data")
 
-euclidean_clusters_complete = agglomerative_clustering(euclidean_dist_matrix, 'complete', num_clusters)
-plot_clusters(data, euclidean_clusters_complete, "Euclidean Distance - Complete Linkage")
+    cosine_clusters_single_normalized = agglomerative_clustering(cosine_dist_matrix, 'single', num_clusters)
+    plot_clusters(normalized_data, cosine_clusters_single_normalized, "Normalized Cosine Distance - Single Linkage")
 
+    cosine_clusters_single_standardized = agglomerative_clustering(cosine_dist_matrix, 'single', num_clusters)
+    plot_clusters(standardized_data, cosine_clusters_single_standardized, "Standardized Cosine Distance - Single Linkage")
+
+
+    # Perform clustering and plot results
+    #manhattan_clusters_single = agglomerative_clustering(manhattan_dist_matrix, 'single', num_clusters)
+    #plot_clusters(data, manhattan_clusters_single, "Manhattan Distance - Single Linkage")
+
+    #manhattan_clusters_complete = agglomerative_clustering(manhattan_dist_matrix, 'complete', num_clusters)
+    #plot_clusters(data, manhattan_clusters_complete, "Manhattan Distance - Complete Linkage")
+
+    #euclidean_clusters_single = agglomerative_clustering(euclidean_dist_matrix, 'single', num_clusters)
+    #plot_clusters(data, euclidean_clusters_single, "Euclidean Distance - Single Linkage")
+
+    #euclidean_clusters_complete = agglomerative_clustering(euclidean_dist_matrix, 'complete', num_clusters)
+    #plot_clusters(data, euclidean_clusters_complete, "Euclidean Distance - Complete Linkage")
+
+
+if __name__ == '__main__':
+    main()
