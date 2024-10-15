@@ -1,20 +1,6 @@
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
-import scipy.cluster.hierarchy as sch
 import matplotlib.pyplot as plt
-# 2 matice - manhattan a euclidean, udělat pro ně single a complete linkage pro obě
-
-for data_file in ['clusters3', 'clusters5', 'clusters5n', 'annulus', 'boxes', 'densegrid']:
-    data = np.loadtxt('/home/jakub/school/7th_semester/SU-2024-25/2_tyden/{}.csv'.format(data_file), delimiter=';')
-# Compute distance matrices
-manhattan_dist = squareform(pdist(data, metric='cityblock'))
-euclidean_dist = squareform(pdist(data, metric='euclidean'))
-
-# Perform agglomerative clustering
-def agglomerative_clustering(dist_matrix, linkage_method, num_clusters):
-    linkage_matrix = sch.linkage(dist_matrix, method=linkage_method)
-    clusters = sch.fcluster(linkage_matrix, num_clusters, criterion='maxclust')
-    return linkage_matrix, clusters
+# vytvoř 2 matice - manhattan a euclidean, udělat pro ně single a complete linkage pro obě
 
 # Plotting function
 def plot_clusters(data, clusters, title):
@@ -23,9 +9,75 @@ def plot_clusters(data, clusters, title):
     plt.title(title)
     plt.show()
 
+def find_clusters(linkage_matrix, num_clusters):
+    clusters = {i: [i] for i in range(len(linkage_matrix) + 1)}
+    for i, (c1, c2, _, _) in enumerate(linkage_matrix):
+        if len(clusters) <= num_clusters:
+            break
+        new_cluster = clusters.pop(int(c1)) + clusters.pop(int(c2))
+        clusters[len(linkage_matrix) + i + 1] = new_cluster
+    labels = np.zeros(len(linkage_matrix) + 1, dtype=int)
+    for cluster_id, members in clusters.items():
+        for member in members:
+            labels[member] = cluster_id
+    return labels
+
+def agglomerative_clustering(dist_matrix, linkage_method, num_clusters):
+    n = dist_matrix.shape[0]
+    clusters = {i: [i] for i in range(n)}
+    linkage_matrix = []
+
+    while len(clusters) > 1:
+        min_dist = float('inf')
+        to_merge = None
+
+        for i, c1 in clusters.items():
+            for j, c2 in clusters.items():
+                if i >= j:
+                    continue
+                if linkage_method == 'single':
+                    dist = np.min([dist_matrix[p1, p2] for p1 in c1 for p2 in c2])
+                elif linkage_method == 'complete':
+                    dist = np.max([dist_matrix[p1, p2] for p1 in c1 for p2 in c2])
+                if dist < min_dist:
+                    min_dist = dist
+                    to_merge = (i, j)
+
+        if to_merge is None:
+            break
+
+        i, j = to_merge
+        new_cluster = clusters.pop(i) + clusters.pop(j)
+        new_cluster_id = n + len(linkage_matrix)
+        clusters[new_cluster_id] = new_cluster
+        linkage_matrix.append([i, j, min_dist, len(new_cluster)])
+
+    linkage_matrix = np.array(linkage_matrix)
+    return find_clusters(linkage_matrix, num_clusters)
+
+
+filename = input("Filename:")
+num_clusters = int(input("Number of clusters:"))
+data = np.loadtxt(filename, delimiter=';')
+#plot_clusters(data, np.zeros(data.shape[0]), "Original Data")
+#print(data)
+
+# Compute Manhattan distance matrix
+manhattan_dist_matrix = np.abs(data[:, np.newaxis] - data).sum(axis=2)
+
+# Compute Euclidean distance matrix
+euclidean_dist_matrix = np.sqrt(((data[:, np.newaxis] - data) ** 2).sum(axis=2))
+
 # Perform clustering and plot results
-for dist_matrix, dist_name in [(manhattan_dist, 'Manhattan'), (euclidean_dist, 'Euclidean')]:
-    for linkage_method in ['single', 'complete']:
-        linkage_matrix, clusters = agglomerative_clustering(dist_matrix, linkage_method, num_clusters=3)
-        plot_clusters(data, clusters, f'{dist_name} Distance - {linkage_method.capitalize()} Linkage')
-        
+manhattan_clusters_single = agglomerative_clustering(manhattan_dist_matrix, 'single', num_clusters)
+plot_clusters(data, manhattan_clusters_single, "Manhattan Distance - Single Linkage")
+
+manhattan_clusters_complete = agglomerative_clustering(manhattan_dist_matrix, 'complete', num_clusters)
+plot_clusters(data, manhattan_clusters_complete, "Manhattan Distance - Complete Linkage")
+
+euclidean_clusters_single = agglomerative_clustering(euclidean_dist_matrix, 'single', num_clusters)
+plot_clusters(data, euclidean_clusters_single, "Euclidean Distance - Single Linkage")
+
+euclidean_clusters_complete = agglomerative_clustering(euclidean_dist_matrix, 'complete', num_clusters)
+plot_clusters(data, euclidean_clusters_complete, "Euclidean Distance - Complete Linkage")
+
