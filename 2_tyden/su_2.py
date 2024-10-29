@@ -2,9 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 
-
-# vytvoř 2 matice - manhattan a euclidean, udělat pro ně single a complete linkage pro obě
-
 def compute_distance(c1, c2, dist_matrix, linkage_method):
     if linkage_method == 'single':
         return np.min([dist_matrix[p1, p2] for p1 in c1 for p2 in c2])
@@ -17,7 +14,7 @@ def plot_clusters(data, clusters, title, save_state):
     plt.title(title)
     if save_state.lower() == 'y':
         plt.savefig(title + '.png')
-    # plt.show()
+    plt.show()
 
 def find_clusters(linkage_matrix, num_clusters):
     clusters = {i: [i] for i in range(len(linkage_matrix) + 1)}
@@ -97,8 +94,8 @@ def main():
 
     # plot_clusters(data, np.zeros(data.shape[0]), "Original Data",save_state)
 
-    #cosine_clusters_single_normalized = agglomerative_clustering(cosine_dist_matrix, 'single', num_clusters)
-    #plot_clusters(normalized_data, cosine_clusters_single_normalized, "Normalized Cosine Distance - Single Linkage",save_state)
+    cosine_clusters_single_normalized = agglomerative_clustering(cosine_dist_matrix, 'complete', num_clusters)
+    plot_clusters(normalized_data, cosine_clusters_single_normalized, "Normalized Cosine Distance - Complete Linkage",save_state)
 
     #cosine_clusters_single_standardized = agglomerative_clustering(cosine_dist_matrix, 'single', num_clusters)
     #plot_clusters(standardized_data, cosine_clusters_single_standardized, "Standardized Cosine Distance - Single Linkage",save_state)
@@ -116,7 +113,7 @@ def main():
     #euclidean_clusters_complete = agglomerative_clustering(euclidean_dist_matrix, 'complete', num_clusters)
     #plot_clusters(data, euclidean_clusters_complete, "Euclidean Distance - Complete Linkage",save_state)
 
-
+    """
     euclidean_clusters_single = agglomerative_clustering(euclidean_dist_matrix, 'single', num_clusters)
     labels_single = find_clusters(euclidean_clusters_single, num_clusters)
     plot_clusters(data, labels_single, "Euclidean Distance - Single Linkage", save_state)
@@ -126,7 +123,7 @@ def main():
     euclidean_clusters_complete = agglomerative_clustering(euclidean_dist_matrix, 'complete', num_clusters)
     labels_complete = find_clusters(euclidean_clusters_complete, num_clusters)
     plot_clusters(data, labels_complete, "Euclidean Distance - Complete Linkage", save_state)
-
+    """
 
 if __name__ == '__main__':
     main()
