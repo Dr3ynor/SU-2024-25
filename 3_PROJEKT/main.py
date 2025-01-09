@@ -1,5 +1,8 @@
 import numpy as np
-
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import normalize
+from sklearn.preprocessing import StandardScaler
 class DBSCAN:
     def __init__(self, eps, min_samples):
         self.eps = eps
@@ -47,12 +50,24 @@ class DBSCAN:
             i += 1
 
 if __name__ == "__main__":
-    # Example dataset
-    X = np.array([
-        [1, 2], [2, 2], [2, 3], [8, 7], [8, 8], [25, 80], [24, 79]
-    ])
+    # Load Titanic dataset
+    data = pd.read_csv("titanic.csv")
 
-    dbscan = DBSCAN(eps=2, min_samples=2)
+    # Example preprocessing: select numerical columns and handle missing values
+    numerical_data = data.select_dtypes(include=[np.number]).fillna(0)
+
+    # Normalize data (optional, improves performance)
+    normalized_data = normalize(numerical_data)
+
+
+    # Convert to numpy array for DBSCAN
+    X = normalized_data
+
+    dbscan = DBSCAN(eps=0.3, min_samples=3)  # Adjust eps and min_samples as needed
     dbscan.fit(X)
 
     print("Cluster labels:", dbscan.labels)
+
+    # Count the number of clusters (excluding noise)
+    n_clusters = len(set(dbscan.labels)) - (1 if -1 in dbscan.labels else 0)
+    print("Number of clusters found:", n_clusters)
