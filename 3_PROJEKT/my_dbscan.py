@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score
+
 class DBSCAN:
     def __init__(self, eps, min_samples):
         self.eps = eps
@@ -53,14 +54,11 @@ class DBSCAN:
 if __name__ == "__main__":
     data = pd.read_csv("iris.csv")
 
-    # Example preprocessing: select numerical columns and handle missing values
     numerical_data = data.select_dtypes(include=[np.number]).fillna(0)
 
-    # Normalize data (optional, improves performance)
     normalized_data = normalize(numerical_data)
 
 
-    # Convert to numpy array for DBSCAN
     X = normalized_data
 
     best_eps = None
@@ -89,14 +87,13 @@ if __name__ == "__main__":
 
 
     print(f"Best eps: {best_eps}, Best min_samples: {best_min_samples}, Best Silhouette Score: {best_score}")
-    # Best eps: 0.4789473684210527, Best min_samples: 26, Best Silhouette Score: 0.7005873260504378
-    # 5, 25
-    dbscan = DBSCAN(eps=best_eps, min_samples=best_min_samples)  # Adjust eps and min_samples as needed
+
+    dbscan = DBSCAN(eps=best_eps, min_samples=best_min_samples)
     dbscan.fit(X)
 
     print("Cluster labels:", dbscan.labels)
 
-    # Count the number of clusters (excluding noise)
+
     n_clusters = len(set(dbscan.labels))
     print("Number of clusters found (with noise cluster):", n_clusters)
 
