@@ -71,8 +71,8 @@ if __name__ == "__main__":
 
     for eps in eps_values:
         for min_samples in min_samples_values:
-            dbscan = DBSCAN(eps=eps, min_samples=min_samples)
-            labels = dbscan.fit(X)
+            my_dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+            labels = my_dbscan.fit(X)
             print(f"eps: {eps}, min_samples: {min_samples}, Number of clusters found: {len(set(labels.labels)) - (1 if -1 in labels.labels else 0)}")
             # Ignore clusters with all noise
             if len(set(labels.labels)) == 1:
@@ -88,17 +88,17 @@ if __name__ == "__main__":
 
     print(f"Best eps: {best_eps}, Best min_samples: {best_min_samples}, Best Silhouette Score: {best_score}")
 
-    dbscan = DBSCAN(eps=best_eps, min_samples=best_min_samples)
-    dbscan.fit(X)
+    my_dbscan = DBSCAN(eps=best_eps, min_samples=best_min_samples)
+    my_dbscan.fit(X)
 
-    print("Cluster labels:", dbscan.labels)
+    print("Cluster labels:", my_dbscan.labels)
 
 
-    n_clusters = len(set(dbscan.labels))
+    n_clusters = len(set(my_dbscan.labels))
     print("Number of clusters found (with noise cluster):", n_clusters)
 
     # Plotting
-    plt.scatter(X[:,0], X[:,1], c=dbscan.labels, cmap='viridis', s=50, alpha=0.5)
+    plt.scatter(X[:,0], X[:,1], c=my_dbscan.labels, cmap='viridis', s=50, alpha=0.5)
     plt.show()
 
 
